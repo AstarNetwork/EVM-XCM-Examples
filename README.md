@@ -25,7 +25,7 @@ To get started with these examples, follow these steps:
 
 #### 1. Set up zombie-net      
 Please download those binaries and copy then in `./zombie-net`    
-[Polkadot 0.9.43 binary](https://github.com/paritytech/polkadot/releases/download/v0.9.43/polkadot)     
+[Polkadot 0.9.43 binary](https://github.com/paritytech/polkadot/releases/download/v0.9.43/polkadot) (for linux user only. For mac user please compile from source code)
 [Zombie net binary](https://github.com/paritytech/zombienet/releases/tag/v1.3.62)     
 [Astar binary](https://github.com/AstarNetwork/Astar/releases/tag/untagged-fbb28f89a196b0cbf750)     
 
