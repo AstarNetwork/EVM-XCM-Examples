@@ -29,10 +29,15 @@ Please download those binaries and copy then in `./zombie-net`
 [Zombie net binary](https://github.com/paritytech/zombienet/releases/tag/v1.3.62)      
 [Astar binary](https://github.com/AstarNetwork/Astar/releases/tag/untagged-fbb28f89a196b0cbf750)      
 
-please rename binaries:
+please **rename binaries**:
 `polakdot`
 `astar-collator`
 `zombienet`
+
+Please make the binaries **executable**:
+```bash
+chmod +x ./polkadot ./astar-collator ./zombienet
+```
 
 Run zombie-net with the command:
 ```bash
