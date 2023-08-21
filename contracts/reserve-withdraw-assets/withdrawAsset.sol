@@ -5,13 +5,15 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../precompiles/XCM_v2.sol";
 import "../utils/AddressToAccount.sol";
 
-contract AAXcmExample {
+contract WithdrawAsset {
     address public constant XCM_ADDRESS =
     0x0000000000000000000000000000000000005004;
 
     // This function is used to transfer asset id = 1
+    // using reserve withdraw assets
     // from parachain 2000 to parachain 2007
-    function reserve_asset_transfer() external {
+    // using relay chain as reserve
+    function reserve_withdraw_asset_transfer() external {
 
         // Destination is parachain 2007
         // as interior is parachain id 2007 prefix with 0x00
@@ -42,7 +44,7 @@ contract AAXcmExample {
         uint256 amount = 100000000000000000000;
 
         // The contract will be the Origin of the XCM
-        // So first approve the contract to spend asset id =1 on behalf of the caller
+        // So first approve the contract to spend asset id = 1 on behalf of the caller
         // contract will transfer the asset to itself first
         // and it will be transferred to beneficiary of the XCM
         IERC20 erc20 = IERC20(assetAddress);
@@ -55,7 +57,7 @@ contract AAXcmExample {
 
         // Send the XCM via XCM precompile
         require(
-            XCM(XCM_ADDRESS).assets_reserve_transfer(
+            XCM(XCM_ADDRESS).assets_withdraw(
                 assetId,
                 assetAmount,
                 beneficiary,
