@@ -3,7 +3,7 @@ import {ApiPromise, WsProvider} from "@polkadot/api";
 
 const DECIMALS = 1_000_000_000_000_000_000n;
 
-// THIS SCRIPT SETUP AN ASSET (ID = 1) FOR SHIBUYA (2000) AND SHIDEN (2006) PARACHAIN
+// THIS SCRIPT SETUP AN ASSET (ID = 1) FOR SHIBUYA (2000) AND SHIDEN (2007) PARACHAIN
 // AND REGISTER ASSET LOCATION OF THIS ASSET
 // ALL VALUES ARE FOR TESTS PURPOSES ONLY
 async function main() {
@@ -24,8 +24,8 @@ async function main() {
     const [signer] = await ethers.getSigners();
 
     const batchA = apiA.tx.utility.batchAll([
-        // Found Alith token account
-        apiA.tx.balances.transferKeepAlive("ZHF53LVPUfmXDyafQ18bGWxMwRBtq19Q4c6MnkFnQVfKBkZ", 1000n * DECIMALS),
+        // Fund Alith token account
+        apiA.tx.balances.transferKeepAlive("ZHF53LVPUfmXDyafQ18bGWxMwRBtq19Q4c6MnkFnQVfKBkZ", 10000000n * DECIMALS),
         // Create asset id =1 and make it sufficient
         apiA.tx.sudo.sudo(apiA.tx.assets.forceCreate(1, {Id: alice.address}, true, 1)),
         // Set metadata for asset id = 1
@@ -47,13 +47,26 @@ async function main() {
             },
             1
         )),
+        // Make it a payable currency - Set asset units per second for asset id = 1 of 1 (really cheap compared form prod value)
+        apiA.tx.sudo.sudo(apiA.tx.xcAssetConfig.setAssetUnitsPerSecond(
+            {
+                V3: {
+                    parents: 0,
+                    interior: {
+                        X1:
+                            {GeneralIndex: 1},
+                    },
+                },
+            },
+            1
+        )),
     ]);
     await sendTransaction(batchA, alice);
 
     const batchB = apiB.tx.utility.batchAll([
-        // Found Alith token account
+        // Fund Alith token account
         apiB.tx.balances.transferKeepAlive("ZHF53LVPUfmXDyafQ18bGWxMwRBtq19Q4c6MnkFnQVfKBkZ", 1000n * DECIMALS),
-        // Found Parcahin A sovereign account to create token. At least should have mint rights
+        // Fund Parcahin A sovereign account to create token. At least should have mint rights
         apiB.tx.balances.transferKeepAlive("5Ec4AhPUwPeyTFyuhGuBbD224mY85LKLMSqSSo33JYWCazU4", 1000n * DECIMALS),
         // Create asset id =1 and make it sufficient. Owner is Parachain A
         apiB.tx.sudo.sudo(apiB.tx.assets.forceCreate(1, "5Ec4AhPUwPeyTFyuhGuBbD224mY85LKLMSqSSo33JYWCazU4", true, 1)),
@@ -74,7 +87,7 @@ async function main() {
             },
             1
         )),
-        // Set asset units per second for asset id = 1 of 1 (really cheap compared form prod value)
+        // Make it a payable currency - Set asset units per second for asset id = 1 of 1 (really cheap compared form prod value)
         apiB.tx.sudo.sudo(apiB.tx.xcAssetConfig.setAssetUnitsPerSecond(
             {
                 V3: {

@@ -10,6 +10,7 @@ chain = "rococo-local"
 
   [[relaychain.nodes]]
   name = "alice"
+  ws_port = 42220
   validator = true
 
   [[relaychain.nodes]]

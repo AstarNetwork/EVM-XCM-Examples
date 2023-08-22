@@ -3,7 +3,8 @@
   "scripts": {
     "build": "hardhat compile",
     "setup": "hardhat run scripts/assetsSetUp.ts",
-    "test": "npx hardhat test --network shibuya_local"
+    "transfer": "npx hardhat test ./test/reserveAssetTransfer.ts --network shibuya_local",
+    "withdraw": "npx hardhat test ./test/reserveWithdrawAsset.ts --network shiden_local"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

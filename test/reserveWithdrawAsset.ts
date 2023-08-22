@@ -19,7 +19,7 @@ describe("Reserve Withdraw Transfer Contract", function () {
     let transfer_contract_account_id: any
 
     // Before all it is needed to:
-    // - deploy contracct
+    // - deploy contract
     // - fund contract with native token
     // - alith approves contract to spend 1000000000000000000000000 of asset id 1
     before("Setup env", async function () {
@@ -58,7 +58,7 @@ describe("Reserve Withdraw Transfer Contract", function () {
             transferContractAddress , 5
         );
         console.log('transfer_contract_account_id : ', transfer_contract_account_id);
-        const unsub = await shibuya_api.tx.balances.transferKeepAlive(transfer_contract_account_id, 1000n * DECIMALS)
+        const unsub = await shiden_api.tx.balances.transferKeepAlive(transfer_contract_account_id, 1000n * DECIMALS)
             .signAndSend(alice, {nonce: -1}, ({ status }) => {
                 if (status.isFinalized) {
                     console.log(`Transaction included at blockHash`);
@@ -78,16 +78,16 @@ describe("Reserve Withdraw Transfer Contract", function () {
         this.timeout(1000 * 1000);
 
         // Balance Before
-        const { balance } = (await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault();
+        const { balance } = (await shibuya_api.query.assets.account(1, alith32)).unwrapOrDefault();
 
-        // await transferContract.connect(alith).reserve_withdraw_asset_transfer({
-        //     gasLimit: 59000
-        // });
-        // await transferContract.connect(alith).reserve_withdraw_asset_transfer({
-        //     gasLimit: 59000
-        // });
+        await transferContract.connect(alith).reserve_withdraw_asset_transfer({
+            gasLimit: 3000000
+        });
+        await transferContract.connect(alith).reserve_withdraw_asset_transfer({
+            gasLimit: 3000000
+        });
 
         await waitFor(60 * 1000);
-        await expect((await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('100000000000000000000')).toString())
+        await expect((await shibuya_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('10000000000000000000')).toString())
     });
 });
