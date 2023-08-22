@@ -50,7 +50,8 @@ yarn setup
 #### 3. Run the tests
 ```bash
 yarn build
-yarn test
+yarn transfer
+yarn withdraw
 ```
 
 ## Examples
