@@ -5,7 +5,7 @@ import "@nomicfoundation/hardhat-ethers";
 import { ApiPromise, Keyring, WsProvider } from "@polkadot/api";
 import * as polkadotCryptoUtils from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { waitFor, DECIMALS } from "./utils";
+import {waitFor, transferAssets, transferNative} from "./utils";
 import {HardhatEthersSigner} from "@nomicfoundation/hardhat-ethers/src/signers";
 
 // Please run `yarn setup` before running this test
@@ -58,13 +58,11 @@ describe("Reserve Asset Transfer Contract", function () {
         transferContractAddress , 5
     );
     console.log('transfer_contract_account_id : ', transfer_contract_account_id);
-    const unsub = await shibuya_api.tx.balances.transferKeepAlive(transfer_contract_account_id, 1000n * DECIMALS)
-        .signAndSend(alice, {nonce: -1}, ({ status }) => {
-          if (status.isFinalized) {
-            console.log(`Transaction included at blockHash`);
-            unsub();
-          }
-        });
+
+    // Transfer Native token to active contract AccountId (because of Existential deposit)
+    await transferNative(shibuya_api, transfer_contract_account_id, alice)
+    // Transfer Asset id = 1 so AccountId will not die (because of minimum balance (set to 1))
+    await transferAssets(shibuya_api, transfer_contract_account_id, alice)
 
     // Approve contract to spend 1000000000000000000000000 of asset id 1 on behalf of Alith
     const tst = await ethers.getContractAt(
@@ -80,9 +78,6 @@ describe("Reserve Asset Transfer Contract", function () {
     // Balance Before
     const { balance } = (await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault();
 
-    await transferContract.connect(alith).reserve_asset_transfer({
-      gasLimit: 346804
-    });
     await transferContract.connect(alith).reserve_asset_transfer({
       gasLimit: 346804
     });
