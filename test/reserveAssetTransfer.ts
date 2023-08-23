@@ -1,16 +1,15 @@
 import { expect } from "chai";
 import {ethers } from "hardhat";
+import BN from 'bn.js';
 import "@nomicfoundation/hardhat-ethers";
 import { ApiPromise, Keyring, WsProvider } from "@polkadot/api";
 import * as polkadotCryptoUtils from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { waitFor} from "./utils";
+import {waitFor, transferAssets, transferNative} from "./utils";
 import {HardhatEthersSigner} from "@nomicfoundation/hardhat-ethers/src/signers";
 
-const DECIMALS = 1_000_000_000_000_000_000n;
-
 // Please run `yarn setup` before running this test
-describe("Transfer Contract", function () {
+describe("Reserve Asset Transfer Contract", function () {
   let shibuya_api: ApiPromise;
   let shiden_api: ApiPromise;
   let alice: KeyringPair;
@@ -20,7 +19,7 @@ describe("Transfer Contract", function () {
   let transfer_contract_account_id: any
 
   // Before all it is needed to:
-  // - deploy contracct
+  // - deploy contract
   // - fund contract with native token
   // - alith approves contract to spend 1000000000000000000000000 of asset id 1
   before("Setup env", async function () {
@@ -38,14 +37,14 @@ describe("Transfer Contract", function () {
     );
     const addressToAccountDeploy = await AddressToAccount.connect(alith).deploy();
     const addressToAccount = await addressToAccountDeploy.getAddress()
-    transferContract = await ethers.getContractFactory("AAXcmExample", {
+    transferContract = await ethers.getContractFactory("AssetTransfer", {
       libraries: {
         AddressToAccount: addressToAccount
       },
     });
     transferContract =  await transferContract.connect(alith).deploy();
     const transferContractAddress = await transferContract.getAddress()
-    console.log("TransferContract deployed to:", transferContractAddress);
+    console.log("Reserve Asset Transfer Contract deployed to:", transferContractAddress);
 
     const wsProvider = new WsProvider("ws://127.0.0.1:42225");
     shibuya_api = await ApiPromise.create({ provider: wsProvider });
@@ -59,13 +58,11 @@ describe("Transfer Contract", function () {
         transferContractAddress , 5
     );
     console.log('transfer_contract_account_id : ', transfer_contract_account_id);
-    const unsub = await shibuya_api.tx.balances.transferKeepAlive(transfer_contract_account_id, 1000n * DECIMALS)
-        .signAndSend(alice, {nonce: -1}, ({ status }) => {
-          if (status.isFinalized) {
-            console.log(`Transaction included at blockHash`);
-            unsub();
-          }
-        });
+
+    // Transfer Native token to active contract AccountId (because of Existential deposit)
+    await transferNative(shibuya_api, transfer_contract_account_id, alice)
+    // Transfer Asset id = 1 so AccountId will not die (because of minimum balance (set to 1))
+    await transferAssets(shibuya_api, transfer_contract_account_id, alice)
 
     // Approve contract to spend 1000000000000000000000000 of asset id 1 on behalf of Alith
     const tst = await ethers.getContractAt(
@@ -79,17 +76,13 @@ describe("Transfer Contract", function () {
     this.timeout(1000 * 1000);
 
     // Balance Before
-    await expect((await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toNumber()).to.equal(0)
+    const { balance } = (await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault();
 
-    await transferContract.connect(alith).reserve_asset_transfer({
-      gasLimit: 346804
-    });
     await transferContract.connect(alith).reserve_asset_transfer({
       gasLimit: 346804
     });
 
     await waitFor(60 * 1000);
-    // Balance after
-    await expect((await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal("100000000000000000000")
+    await expect((await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('100000000000000000000')).toString())
   });
 });

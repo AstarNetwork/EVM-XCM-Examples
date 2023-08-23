@@ -5,20 +5,21 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../precompiles/XCM_v2.sol";
 import "../utils/AddressToAccount.sol";
 
-contract AAXcmExample {
+contract WithdrawAsset {
     address public constant XCM_ADDRESS =
     0x0000000000000000000000000000000000005004;
 
-    // This function is used to transfer asset id = 1
-    // from parachain 2000 to parachain 2007
-    function reserve_asset_transfer() external {
+    // This function is used to transfer back asset id = 1
+    // from parachain to reserve of the asset
+    // from parachain 2007 to parachain 2000
+    function reserve_withdraw_asset_transfer() external {
 
-        // Destination is parachain 2007
-        // as interior is parachain id 2007 prefix with 0x00
-        // 0x00 + (2007 as hex = 0x000007d7)
-        // Multilocation: { parents: 1, interior: [Parachain: 2007] }
+        // Destination is parachain 2000
+        // as interior is parachain id 2000 prefix with 0x00
+        // 0x00 + (2000 as hex = 0x000007d0)
+        // Multilocation: { parents: 1, interior: [Parachain: 2000] }
         bytes[] memory interior1 = new bytes[](1);
-        interior1[0] = bytes.concat(hex"00", bytes4(uint32(2007)));
+        interior1[0] = bytes.concat(hex"00", bytes4(uint32(2000)));
         XCM.Multilocation memory destination = XCM.Multilocation({ parents: 1,
             interior: interior1});
 
@@ -35,14 +36,13 @@ contract AAXcmExample {
         XCM.Multilocation memory beneficiary = XCM.Multilocation({ parents: 0,
             interior: interior});
 
-
         // This is the precompile address of asset id = 1
         // address = '0xFFFFFFFF...' + DecimalToHex(AssetId)
         address assetAddress = 0xFfFFFFff00000000000000000000000000000001;
-        uint256 amount = 100000000000000000000;
+        uint256 amount = 10000000000000000000;
 
         // The contract will be the Origin of the XCM
-        // So first approve the contract to spend asset id =1 on behalf of the caller
+        // So first approve the contract to spend *amount* of asset id = 1 on behalf of the caller
         // contract will transfer the asset to itself first
         // and it will be transferred to beneficiary of the XCM
         IERC20 erc20 = IERC20(assetAddress);
@@ -55,7 +55,7 @@ contract AAXcmExample {
 
         // Send the XCM via XCM precompile
         require(
-            XCM(XCM_ADDRESS).assets_reserve_transfer(
+            XCM(XCM_ADDRESS).assets_withdraw(
                 assetId,
                 assetAmount,
                 beneficiary,
