@@ -25,21 +25,27 @@ To get started with these examples, follow these steps:
 
 #### 1. Set up zombie-net      
 Please download those binaries and copy then in `./zombie-net`      
-[Polkadot 0.9.43 binary](https://github.com/paritytech/polkadot/releases/download/v0.9.43/polkadot) (for linux user only. For mac user please compile from source code)                
+[Polkadot](https://github.com/paritytech/polkadot/releases/download/v0.9.43/polkadot)           
 [Zombie net binary](https://github.com/paritytech/zombienet/releases/tag/v1.3.62)      
-[Astar binary](https://github.com/AstarNetwork/Astar/releases/tag/untagged-fbb28f89a196b0cbf750)      
+[Astar](https://github.com/AstarNetwork/Astar/releases/tag/untagged-fbb28f89a196b0cbf750)
 
-please **rename binaries**:
+For Mac users please downlaod compatible binaries:     
+[Polkadot](https://mega.nz/file/OEkkQTgS#OdGkIykcAb0O5UBDXViHJi5Jxt0nO_EdIzGkLJyHZq8) (MEGA link)     
+[Astar binary](https://mega.nz/file/uU1hCAQQ#8RrwtmIywMonQJgg9oYHPkNJCS9_DlU343V3CGzQmU4)     
+[Zombie net binary](https://github.com/paritytech/zombienet/releases/tag/v1.3.62) (MEGA Link)     
+Alternatively you can compile Polakdot & Astar node on you local machine.     
+
+**1.2** please **rename binaries**:
 `polakdot`
 `astar-collator`
 `zombienet`
 
-Please make the binaries **executable**:
+**1.3** Please make the binaries **executable**:
 ```bash
 chmod +x ./polkadot ./astar-collator ./zombienet
 ```
 
-Run zombie-net with the command:
+**1.4** Run zombie-net with the command:
 ```bash
 ./zombienet -p native spawn multi.toml
 ```
