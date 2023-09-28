@@ -26,6 +26,8 @@ async function main() {
     const batchA = apiA.tx.utility.batchAll([
         // Fund Alith token account
         apiA.tx.balances.transferKeepAlive("ZHF53LVPUfmXDyafQ18bGWxMwRBtq19Q4c6MnkFnQVfKBkZ", 10000000n * DECIMALS),
+        // Fund Alice remote Shiden account
+        apiA.tx.balances.transferKeepAlive("5G6osc6ZdvUkEZUkhKnCxgCr7K9rhar3xzpmRBrCWifZ3y9i", 1000n * DECIMALS),
         // Create asset id =1 and make it sufficient
         apiA.tx.sudo.sudo(apiA.tx.assets.forceCreate(1, {Id: alice.address}, true, 1)),
         // Set metadata for asset id = 1

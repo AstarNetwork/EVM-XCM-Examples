@@ -4,7 +4,8 @@
     "build": "hardhat compile",
     "setup": "hardhat run scripts/assetsSetUp.ts",
     "transfer": "npx hardhat test ./test/reserveAssetTransfer.ts --network shibuya_local",
-    "withdraw": "npx hardhat test ./test/reserveWithdrawAsset.ts --network shiden_local"
+    "withdraw": "npx hardhat test ./test/reserveWithdrawAsset.ts --network shiden_local",
+    "transac": "npx hardhat test ./test/transac.ts --network shiden_local"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

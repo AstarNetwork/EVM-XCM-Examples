@@ -7,6 +7,7 @@ import * as polkadotCryptoUtils from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import {waitFor, transferAssets, transferNative} from "./utils";
 import {HardhatEthersSigner} from "@nomicfoundation/hardhat-ethers/src/signers";
+import { CodePromise } from '@polkadot/api-contract';
 
 // Please run `yarn setup` before running this test
 describe("Reserve Asset Transfer Contract", function () {
