@@ -13,7 +13,7 @@ async function main() {
 
     // Shibuya Parachain 2000
     let apiA = await ApiPromise.create({provider: new WsProvider("ws://localhost:42225"), noInitWarn: true});
-    // Shiden Parachain 2006
+    // Shiden Parachain 2007
     let apiB = await ApiPromise.create({provider: new WsProvider("ws://localhost:42226"), noInitWarn: true});
 
     await polkadotCryptoUtils.cryptoWaitReady();
@@ -97,6 +97,31 @@ async function main() {
                             {Parachain: 2000},
                             {GeneralIndex: 1},
                         ],
+                    },
+                },
+            },
+            1
+        )),
+        // Create asset id = 2 (wrapper of parachain A native token) and make it sufficient. Owner is Parachain A.
+        apiB.tx.sudo.sudo(apiB.tx.assets.forceCreate(2, "5Ec4AhPUwPeyTFyuhGuBbD224mY85LKLMSqSSo33JYWCazU4", true, 1)),
+        // Register asset location for asset id = 2
+        apiB.tx.sudo.sudo(apiB.tx.xcAssetConfig.registerAssetLocation(
+            {
+                V3: {
+                    parents: 1,
+                    interior: {
+                        X1: {Parachain: 2000},
+                    },
+                },
+            },
+            2
+        )),
+        apiB.tx.sudo.sudo(apiB.tx.xcAssetConfig.setAssetUnitsPerSecond(
+            {
+                V3: {
+                    parents: 1,
+                    interior: {
+                        X1:  {Parachain: 2000},
                     },
                 },
             },

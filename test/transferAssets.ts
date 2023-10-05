@@ -69,7 +69,7 @@ describe("Reserve Asset Transfer Contract", function () {
         "IERC20",
         "0xFfFFFFff00000000000000000000000000000001"
     );
-    await tst.connect(alith).approve(transferContract, "1000000000000000000000000");
+    await tst.connect(alith).approve(transferContract, "10000000000000000000000");
   });
 
   it("Should perform a reserve asset transfer", async function () {
@@ -79,10 +79,10 @@ describe("Reserve Asset Transfer Contract", function () {
     const { balance } = (await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault();
 
     await transferContract.connect(alith).reserve_asset_transfer({
-      gasLimit: 346804
+      gasLimit: 3000000
     });
 
     await waitFor(60 * 1000);
-    await expect((await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('100000000000000000000')).toString())
+    await expect((await shiden_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('10000000000000000000000')).toString())
   });
 });

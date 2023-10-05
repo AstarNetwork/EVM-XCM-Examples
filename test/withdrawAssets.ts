@@ -37,7 +37,7 @@ describe("Reserve Withdraw Transfer Contract", function () {
         );
         const addressToAccountDeploy = await AddressToAccount.connect(alith).deploy();
         const addressToAccount = await addressToAccountDeploy.getAddress()
-        transferContract = await ethers.getContractFactory("WithdrawAsset", {
+        transferContract = await ethers.getContractFactory("WithdrawAssets", {
             libraries: {
                 AddressToAccount: addressToAccount
             },
@@ -64,12 +64,12 @@ describe("Reserve Withdraw Transfer Contract", function () {
         // Transfer Asset id = 1 so AccountId will not die (because of minimum balance (set to 1))
         await transferAssets(shiden_api, transfer_contract_account_id, alice)
 
-        // Approve contract to spend 1000000000000000000000000 of asset id 1 on behalf of Alith
+        // Approve contract to spend 10000000000000000000 of asset id 1 on behalf of Alith
         const tst = await ethers.getContractAt(
             "IERC20",
             "0xFfFFFFff00000000000000000000000000000001"
         );
-        await tst.connect(alith).approve(transferContract, "1000000000000000000000000");
+        await tst.connect(alith).approve(transferContract, "10000000000000000000000");
     });
 
     it("Should perform a withdraw asset transfer", async function () {
@@ -78,11 +78,11 @@ describe("Reserve Withdraw Transfer Contract", function () {
         // Balance Before
         const { balance } = (await shibuya_api.query.assets.account(1, alith32)).unwrapOrDefault();
 
-        await transferContract.connect(alith).reserve_withdraw_asset_transfer({
+        await transferContract.connect(alith).withdraw_assets({
             gasLimit: 3000000
         });
 
         await waitFor(60 * 1000);
-        await expect((await shibuya_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('10000000000000000000')).toString())
+        await expect((await shibuya_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('10000000000000000000000')).toString())
     });
 });
