@@ -24,7 +24,11 @@ contract WithdrawAssets {
         XCM.Multilocation memory asset = XCM.Multilocation({ parents: 1,
             interior: interior1});
 
-
+        // beneficiary is the caller of the contract in parachain 2000
+        // first we get the AccountId32 of the H160 (accountId20) caller
+        // as interior is accountId32 prefix with 0x01 and suffix with 0x00 (network: any)
+        // 0x01 + AccountId32 + 0x00
+        // Multilocation: { parents: 1, interior: X2 [Parachain: 2000, AccountId32: { id: *caller AccountId* , network: any }] }
         bytes32 publicKey = AddressToAccount.AddressToSubstrateAccount(
             msg.sender
         );
@@ -53,7 +57,6 @@ contract WithdrawAssets {
             proof_size: 300_000
         });
 
-        // Send the XCM via XCM precompile
         require(
             XCM(XCM_ADDRESS).transfer_multiasset(
                 asset,
@@ -64,18 +67,4 @@ contract WithdrawAssets {
             "Failed to send xcm"
         );
     }
-
-    function encode_uint128(uint128 x) internal pure returns (bytes memory) {
-        bytes memory b = new bytes(16);
-        for (uint i = 0; i < 16; i++) {
-            b[i] = bytes1(uint8(x / (2 ** (8 * i))));
-        }
-        return b;
-    }
-
-//    function balanceOf(address who) public view returns (uint256) {
-//        address assetAddress = 0xFfFFFFff00000000000000000000000000000001;
-//        IERC20 erc20 = IERC20(assetAddress);
-//        return erc20.balanceOf(who);
-//}
 }

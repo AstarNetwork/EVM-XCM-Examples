@@ -24,16 +24,10 @@ The goal is to provide a **simple and easy to understand** examples for each pre
 To get started with these examples, follow these steps:
 
 #### 1. Set up zombie-net      
-Please download those binaries and copy then in `./zombie-net`      
-[Polkadot](https://github.com/paritytech/polkadot/releases/download/v0.9.43/polkadot)           
+Please download those binaries for your OS and copy then in `./zombie-net`      
+[Polkadot](https://github.com/paritytech/polkadot/releases/tag/v0.9.43) - For non linux user. Download source code and compile it with `cargo build --release`    
 [Zombie net binary](https://github.com/paritytech/zombienet/releases/tag/v1.3.62)      
-[Astar](https://github.com/AstarNetwork/Astar/releases/tag/untagged-fbb28f89a196b0cbf750)
-
-For Mac users please downlaod compatible binaries:     
-[Polkadot](https://mega.nz/file/OEkkQTgS#OdGkIykcAb0O5UBDXViHJi5Jxt0nO_EdIzGkLJyHZq8) (MEGA link)     
-[Astar binary](https://mega.nz/file/uU1hCAQQ#8RrwtmIywMonQJgg9oYHPkNJCS9_DlU343V3CGzQmU4)     
-[Zombie net binary](https://github.com/paritytech/zombienet/releases/tag/v1.3.62) (MEGA Link)     
-Alternatively you can compile Polakdot & Astar node on you local machine.     
+[Astar](https://github.com/AstarNetwork/Astar/releases/tag/untagged-b3776ae57c2d3afe42c4)    
 
 **1.2** please **rename binaries**:
 `polakdot`
@@ -50,7 +44,7 @@ chmod +x ./polkadot ./astar-collator ./zombienet
 ./zombienet -p native spawn multi.toml
 ```
 
-#### 2. Set up the environment
+#### 2. Run scripts - Set up the environment
 The examples rely on a Shibuya and Shiden parachain with an open HRMP channel. an asset TST (id = 1) is created in both parachain. Location is registerd as Shibuya.
 First ensure **zombienet is running**
 ```bash
@@ -67,9 +61,19 @@ yarn withdraw
 
 ## Examples
 
-### Reserve asset transfer
-This example will transfer asset id = 1 owned by alith (EVM H160 address of Alice) from Shibuya to Shiden using reserve asset transfer.
-The contract can be found in `./contracts/asset-transfer/assetTransfer.sol`. Integrations tests are in the file `./test/reserveAssetTransfer.ts`.
+All examples use XCM precompiles that use xToken pallet.
+
+### Transfer asset
+This example will transfer asset id = 1 owned by alith (EVM H160 address of Alice) from Shibuya to Shiden using xToken `transfer`.
+The contract can be found in `./contracts/transfer-assets/assetTransfer.sol`. Integrations tests are in the file `./test/transferAssets.ts`.
+
+### Withdraw asset
+After having transferred asset id = 1 form reserve to another parachain, we will call withdraw to transfer back the asset to reserve. This example will transfer asset id = 1 owned by alith from Shiden to Shibuya using xToken `transfer_multiasset`.    
+The contract can be found in `./contracts/withdraw-assets/withdrawAsset.sol`. Integrations tests are in the file `./test/withdrawAssets.ts`.
+
+### Transfer Native token
+This example will transfer native Shibuya token to a wrapped Shibuya token in Shiden using xToken `transfer_multiasset`.
+The contract can be found in `./contracts/transfer-native/transferNative.sol`. Integrations tests are in the file `./test/transferNative.ts`.
 
 ## Contributing
 

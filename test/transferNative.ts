@@ -8,8 +8,8 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import {waitFor, transferAssets, transferNative} from "./utils";
 import {HardhatEthersSigner} from "@nomicfoundation/hardhat-ethers/src/signers";
 
-// Please run `yarn setup` before running this test
-describe("Reserve Asset Transfer Contract", function () {
+// !!! Please run `yarn setup` before running this test
+describe("Native token Transfer Contract", function () {
     let shibuya_api: ApiPromise;
     let shiden_api: ApiPromise;
     let alice: KeyringPair;
@@ -21,7 +21,6 @@ describe("Reserve Asset Transfer Contract", function () {
     // Before all it is needed to:
     // - deploy contract
     // - fund contract with native token
-    // - alith approves contract to spend 1000000000000000000000000 of asset id 1
     before("Setup env", async function () {
         this.timeout(1000 * 1000);
 
@@ -57,25 +56,28 @@ describe("Reserve Asset Transfer Contract", function () {
         transfer_contract_account_id = polkadotCryptoUtils.evmToAddress(
             transferContractAddress , 5
         );
-        console.log("Reserve Asset Transfer Contract deployed to:", transferContractAddress);
+        console.log("Native Token transfer deployed to:", transferContractAddress);
         console.log('transfer_contract_account_id : ', transfer_contract_account_id);
 
         // Transfer Native token to active contract AccountId (because of Existential deposit)
         await transferNative(shibuya_api, transfer_contract_account_id, alice)
     });
 
-    it("Should perform a reserve asset transfer", async function () {
+    it("Should perform a native token transfer", async function () {
         this.timeout(1000 * 1000);
 
-        // Balance Before
         const { balance } = (await shiden_api.query.assets.account(2, alith32)).unwrapOrDefault();
+        console.log('balance of asset id = 2 (Parachain 2000 Native token wrapper) in parachain 2007 BEFORE:', balance.toString());
 
-        await transferContract.connect(alith).transfer({
+        console.log('calling native token transfer contract on parachain 2000 to transfer native token to native token wrapper on parachain 2007');
+        await transferContract.connect(alith).transfer_native({
             value: "10000000000000000000",
             gasLimit: 3000000
         });
 
         await waitFor(60 * 1000);
-        await expect((await shiden_api.query.assets.account(2, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('100000000000000000000')).toString())
+        const balanceAfter = (await shiden_api.query.assets.account(2, alith32)).unwrapOrDefault().balance.toString();
+        console.log('balance of asset id = 2 (Parachain 2000 token wrapper) in parachain 2007 AFTER:', balanceAfter);
+        expect(balanceAfter).to.equal(balance.add(new BN('10000000000000000000')).toString())
     });
 });

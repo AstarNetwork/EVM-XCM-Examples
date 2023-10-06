@@ -5,7 +5,7 @@
     "setup": "hardhat run scripts/assetsSetUp.ts",
     "transfer": "npx hardhat test ./test/transferAssets.ts --network shibuya_local",
     "withdraw": "npx hardhat test ./test/withdrawAssets.ts --network shiden_local",
-    "xtokens": "npx hardhat test ./test/xTokens.ts --network shibuya_local"
+    "native": "npx hardhat test ./test/transferNative.ts --network shibuya_local"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

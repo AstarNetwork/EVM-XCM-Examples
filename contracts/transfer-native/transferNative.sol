@@ -9,9 +9,23 @@ contract TransferNative {
     address public constant XCM_ADDRESS =
     0x0000000000000000000000000000000000005004;
 
-    // This function is used to transfer native tokens
+    // This function is used to transfer native token
     // from parachain 2000 to parachain 2007
-    function transfer() external payable {
+    function transfer_native() external payable {
+        // Native token Multilocation
+        // Initialize as an empty bytes array
+        // Multilocation: { parents: 0, interior: Here }
+        bytes[] memory interior1 = new bytes[](0);
+        XCM.Multilocation memory asset = XCM.Multilocation({
+            parents: 0,
+            interior: interior1
+        });
+
+        // beneficiary is the caller of the contract in parachain 2007
+        // first we get the AccountId32 of the H160 (accountId20) caller
+        // as interior is accountId32 prefix with 0x01 and suffix with 0x00 (network: any)
+        // 0x01 + AccountId32 + 0x00
+        // Multilocation: { parents: 1, interior: X2 [Parachain: 2007, AccountId32: { id: *caller AccountId* , network: any }] }
         bytes32 publicKey = AddressToAccount.AddressToSubstrateAccount(
             msg.sender
         );
@@ -23,8 +37,7 @@ contract TransferNative {
             interior: interior
         });
 
-        address currencyAddress = 0x0000000000000000000000000000000000000000;
-        uint256 amount = 10000000000000000000000;
+        uint256 amount = 10000000000000000000;
 
         XCM.WeightV2 memory weight = XCM.WeightV2({
             ref_time: 30_000_000_000,
@@ -32,13 +45,13 @@ contract TransferNative {
         });
 
         require(
-            XCM(XCM_ADDRESS).transfer(
-                currencyAddress,
+            XCM(XCM_ADDRESS).transfer_multiasset(
+                asset,
                 amount,
                 destination,
                 weight
             ),
-            "Failed to transfer"
+            "Failed to send xcm"
         );
      }
 }

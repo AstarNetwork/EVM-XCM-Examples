@@ -11,7 +11,7 @@ contract AssetTransfer {
 
     // This function is used to transfer asset id = 1
     // from parachain 2000 to parachain 2007
-    function reserve_asset_transfer() external {
+    function assets_transfer() external {
         // Destination is parachain 2007
         // as interior is parachain id 2007 prefix with 0x00
         // Multilocation: { parents: 1, interior: [Parachain: 2000] }
@@ -42,7 +42,6 @@ contract AssetTransfer {
         IERC20 erc20 = IERC20(assetAddress);
         erc20.transferFrom(msg.sender, address(this), amount);
 
-        // Max weight to use
         XCM.WeightV2 memory weight = XCM.WeightV2({
             ref_time: 30_000_000_000,
             proof_size: 300_000
