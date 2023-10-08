@@ -1,5 +1,4 @@
 import {ethers} from "hardhat";
-import {ApiPromise, WsProvider} from "@polkadot/api";
 
 const DECIMALS = 1_000_000_000_000_000_000n;
 
@@ -133,12 +132,12 @@ async function main() {
     console.log("Set up done")
 }
 
-async function sendTransaction(transaction, sender) {
+async function sendTransaction(transaction: { signAndSend: (arg0: any, arg1: (result: any) => Promise<void>) => Promise<any>; }, sender: any) {
     const SPAWNING_TIME = 500000;
 
     const result = await new Promise((resolve, reject) => {
-        let unsubscribe;
-        let timeout;
+        let unsubscribe: () => void;
+        let timeout: NodeJS.Timeout | undefined;
 
         transaction
             .signAndSend(sender, async (result) => {
@@ -171,7 +170,9 @@ async function sendTransaction(transaction, sender) {
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main().catch((error) => {
+main().then(() => {
+    process.exit(0);
+}).catch((error) => {
     console.error(error);
-    process.exitCode = 1;
+    process.exit(1);
 });
