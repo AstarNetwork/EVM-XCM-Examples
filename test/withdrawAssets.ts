@@ -8,8 +8,10 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import {waitFor, transferNative, transferAssets} from "./utils";
 import {HardhatEthersSigner} from "@nomicfoundation/hardhat-ethers/src/signers";
 
-// Please run `yarn setup` before running this test
-describe("Reserve Withdraw Transfer Contract", function () {
+// !!! Please run `yarn setup` before running this test
+// !!! Please run transfer before `yarn transfer`
+// As it will transfer token back
+describe("Withdraw Transfer Contract", function () {
     let shibuya_api: ApiPromise;
     let shiden_api: ApiPromise;
     let alice: KeyringPair;
@@ -21,7 +23,7 @@ describe("Reserve Withdraw Transfer Contract", function () {
     // Before all it is needed to:
     // - deploy contract
     // - fund contract with native token
-    // - alith approves contract to spend 1000000000000000000000000 of asset id 1
+    // - alith approves contract to spend amount of asset id 1
     before("Setup env", async function () {
         this.timeout(1000 * 1000);
 
@@ -37,7 +39,7 @@ describe("Reserve Withdraw Transfer Contract", function () {
         );
         const addressToAccountDeploy = await AddressToAccount.connect(alith).deploy();
         const addressToAccount = await addressToAccountDeploy.getAddress()
-        transferContract = await ethers.getContractFactory("WithdrawAsset", {
+        transferContract = await ethers.getContractFactory("WithdrawAssets", {
             libraries: {
                 AddressToAccount: addressToAccount
             },
@@ -57,6 +59,7 @@ describe("Reserve Withdraw Transfer Contract", function () {
         transfer_contract_account_id = polkadotCryptoUtils.evmToAddress(
             transferContractAddress , 5
         );
+        console.log("Withdraw Contract deployed to:", transferContractAddress);
         console.log('transfer_contract_account_id : ', transfer_contract_account_id);
 
         // Transfer Native token to active contract AccountId (because of Existential deposit)
@@ -64,12 +67,12 @@ describe("Reserve Withdraw Transfer Contract", function () {
         // Transfer Asset id = 1 so AccountId will not die (because of minimum balance (set to 1))
         await transferAssets(shiden_api, transfer_contract_account_id, alice)
 
-        // Approve contract to spend 1000000000000000000000000 of asset id 1 on behalf of Alith
+        // Approve contract to spend 10000000000000000000 of asset id 1 on behalf of Alith
         const tst = await ethers.getContractAt(
             "IERC20",
             "0xFfFFFFff00000000000000000000000000000001"
         );
-        await tst.connect(alith).approve(transferContract, "1000000000000000000000000");
+        await tst.connect(alith).approve(transferContract, "10000000000000000000000");
     });
 
     it("Should perform a withdraw asset transfer", async function () {
@@ -77,12 +80,16 @@ describe("Reserve Withdraw Transfer Contract", function () {
 
         // Balance Before
         const { balance } = (await shibuya_api.query.assets.account(1, alith32)).unwrapOrDefault();
+        console.log('balance of asset id = 1 in parachain 2000 BEFORE: ', balance.toString());
 
-        await transferContract.connect(alith).reserve_withdraw_asset_transfer({
+        console.log('calling token transfer contract on parachain 2007 to transfer asset id = 1 to parachain 2000 (reserve of the asset)');
+        await transferContract.connect(alith).withdraw_assets({
             gasLimit: 3000000
         });
 
         await waitFor(60 * 1000);
-        await expect((await shibuya_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString()).to.equal(balance.add(new BN('10000000000000000000')).toString())
+        const balanceAfter  = (await shibuya_api.query.assets.account(1, alith32)).unwrapOrDefault().balance.toString();
+        console.log('balance of asset id = 1 in parachain 2000 AFTER: ', balanceAfter);
+        expect(balanceAfter).to.equal(balance.add(new BN('10000000000000000000000')).toString())
     });
 });

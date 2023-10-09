@@ -1,5 +1,4 @@
 import {ethers} from "hardhat";
-import {ApiPromise, WsProvider} from "@polkadot/api";
 
 const DECIMALS = 1_000_000_000_000_000_000n;
 
@@ -13,7 +12,7 @@ async function main() {
 
     // Shibuya Parachain 2000
     let apiA = await ApiPromise.create({provider: new WsProvider("ws://localhost:42225"), noInitWarn: true});
-    // Shiden Parachain 2006
+    // Shiden Parachain 2007
     let apiB = await ApiPromise.create({provider: new WsProvider("ws://localhost:42226"), noInitWarn: true});
 
     await polkadotCryptoUtils.cryptoWaitReady();
@@ -102,18 +101,43 @@ async function main() {
             },
             1
         )),
+        // Create asset id = 2 (wrapper of parachain A native token) and make it sufficient. Owner is Parachain A.
+        apiB.tx.sudo.sudo(apiB.tx.assets.forceCreate(2, "5Ec4AhPUwPeyTFyuhGuBbD224mY85LKLMSqSSo33JYWCazU4", true, 1)),
+        // Register asset location for asset id = 2
+        apiB.tx.sudo.sudo(apiB.tx.xcAssetConfig.registerAssetLocation(
+            {
+                V3: {
+                    parents: 1,
+                    interior: {
+                        X1: {Parachain: 2000},
+                    },
+                },
+            },
+            2
+        )),
+        apiB.tx.sudo.sudo(apiB.tx.xcAssetConfig.setAssetUnitsPerSecond(
+            {
+                V3: {
+                    parents: 1,
+                    interior: {
+                        X1:  {Parachain: 2000},
+                    },
+                },
+            },
+            1
+        )),
     ]);
 
     await sendTransaction(batchB, alice);
     console.log("Set up done")
 }
 
-async function sendTransaction(transaction, sender) {
+async function sendTransaction(transaction: { signAndSend: (arg0: any, arg1: (result: any) => Promise<void>) => Promise<any>; }, sender: any) {
     const SPAWNING_TIME = 500000;
 
     const result = await new Promise((resolve, reject) => {
-        let unsubscribe;
-        let timeout;
+        let unsubscribe: () => void;
+        let timeout: NodeJS.Timeout | undefined;
 
         transaction
             .signAndSend(sender, async (result) => {
@@ -146,7 +170,9 @@ async function sendTransaction(transaction, sender) {
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main().catch((error) => {
+main().then(() => {
+    process.exit(0);
+}).catch((error) => {
     console.error(error);
-    process.exitCode = 1;
+    process.exit(1);
 });
